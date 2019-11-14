@@ -5,17 +5,38 @@ const API_URL = 'https://apis.is/company?name=';
  */
 const program = (() => {
   let companies;
-  function init(companies) {
 
+  function init(_companies) {
+    companies = _companies;
     const form = companies.querySelector("form");
     form.addEventListener("submit", search);
+  }
+
+  function loading()
+  {
+    var node = document.querySelector(".results");
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+
+    const loadDiv = document.createElement("div");
+    loadDiv.classList.add("loading");
+    const loadGif = document.createElement("img");
+    loadGif.src = "loading.gif";
+    const loadMsg = document.createElement("p");
+    loadMsg.textContent = "Leita að fyrirtækjum...";
+
+    loadDiv.appendChild(loadGif);
+    loadDiv.appendChild(loadMsg);
+
+    node.appendChild(loadDiv);
   }
 
   function search(e)
   {
     e.preventDefault();
-    const companyName = e.target.querySelector("input").value;
-    if(companyName.length() > 0)
+    const companyName = e.target.querySelector('input').value;
+    if(companyName.length > 0  && /\S/.test(companyName))
     {
       fetchData(companyName);
     }
@@ -28,26 +49,26 @@ const program = (() => {
   function fetchData(companyName)
   {
     const url = API_URL + companyName;
-    var json = fetch(url)
+    fetch(url)
       .then((result) => {
-        if (!result.ok) {
-          throw new Error("Villa!");
+        if (result.ok) {
+          return result.json();
         }
-        return result.json();
+        throw new Error();
       })
-      .then(data => {addData(data.results);})
-      .catch(error => {errorMessage("Villa við að sækja gögn.");});
+      .then((data) => {addData(data.results);})
+      .catch(() => {errorMessage("Villa við að sækja gögn.");});
   }
 
   function addData(data)
   {
-    if (data.length() === 0)
+    if (data.length === 0)
     {
       errorMessage("Ekkert fyrirtæki fannst fyrir leitarstreng");
       return;
     }
 
-    var node = document.getElementById("results");
+    var node = document.querySelector(".results");
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
@@ -60,13 +81,13 @@ const program = (() => {
       resultDiv.classList.add("company");
       const dList = document.createElement("dl");
       const dtName = document.createElement("dt");
-      dtName.textContent("Nafn:");
+      dtName.textContent = "Nafn:";
       const ddName = document.createElement("dd");
-      dtName.textContent(obj.name);
+      ddName.textContent = obj.name;
       const dtSnumber = document.createElement("dt");
-      dtName.textContent("Kennitala:");
+      dtSnumber.textContent = "Kennitala:";
       const ddSnumber = document.createElement("dd");
-      dtName.textContent("obj.sn");
+      ddSnumber.textContent = obj.sn;
 
       dList.appendChild(dtName);
       dList.appendChild(ddName);
@@ -77,9 +98,9 @@ const program = (() => {
       {
         resultDiv.classList.add("company--active");
         const dtAddress = document.createElement("dt");
-        dtAddress.textContent("Heimilisfang:");
+        dtAddress.textContent = "Heimilisfang:";
         const ddAddress = document.createElement("dd");
-        ddAddress.textContent(obj.address);
+        ddAddress.textContent = obj.address;
         dList.appendChild(dtAddress);
         dList.appendChild(ddAddress);
       }
@@ -95,7 +116,7 @@ const program = (() => {
 
   function errorMessage(error)
   {
-    var node = document.getElementById("results");
+    var node = document.querySelector(".results");
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
@@ -108,6 +129,6 @@ const program = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  const companies = document.querySelector("section");
+  const companies = document.querySelector('section');
   program.init(companies);
 });
