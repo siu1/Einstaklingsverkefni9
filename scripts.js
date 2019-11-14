@@ -35,6 +35,7 @@ const program = (() => {
   function search(e)
   {
     e.preventDefault();
+    loading();
     const companyName = e.target.querySelector('input').value;
     if(companyName.length > 0  && /\S/.test(companyName))
     {
